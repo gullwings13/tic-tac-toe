@@ -1,0 +1,43 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+.square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height:100px;
+    width:100px;
+    border: 1px black solid;
+    transition: background-color 0.1s;
+}
+
+.board{
+    display: flex;
+    flex-wrap: wrap;
+    height: 306px;
+    width: 306px;
+}
+
+.status{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    width: 306px;
+}
+
+.main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.grey{
+    background-color: grey;
+}
+
+
+
