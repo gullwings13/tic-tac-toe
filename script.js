@@ -1,4 +1,8 @@
 let isPLayer1Turn = true
+let player1Name = 'Bob'
+let player2Name = 'Ken'
+let player1Color = 'rgba(255,0,0,1)'
+let player2Color = 'rgba(0,255,0,1)'
 let player1Token = 'X'
 let player2Token = 'O'
 let gameBoardArray = []
@@ -12,6 +16,7 @@ let confettiColors = [
     'rgba(242, 193, 78, 1)']
 
 let fadeFallTimeOut
+let onboardPlayer = 1
 
 function addClass(event)
 {
@@ -27,7 +32,7 @@ const checkForWin = () =>
 {
     if (checkBoard(player1Token))
     {
-        document.querySelector('.status').innerHTML = 'PlayerOne Wins!!'
+        document.querySelector('.status').innerHTML = `${player1Name} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
@@ -35,7 +40,7 @@ const checkForWin = () =>
     }
     else if (checkBoard(player2Token))
     {
-        document.querySelector('.status').innerHTML = 'PlayerTwo Wins!!'
+        document.querySelector('.status').innerHTML = `${player2Name} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
@@ -104,16 +109,17 @@ function squareClicked() // avoid arrow function to make use of the this propert
         {
             this.innerHTML = player1Token
             isPLayer1Turn = false
-            document.querySelector('.status').innerHTML = "PlayerTwo's turn"
-            document.querySelector('.status').style.backgroundColor = "orange"
+            document.querySelector('.status').innerHTML = `${player2Name}'s turn`
+            document.querySelector('.status').style.backgroundColor = player2Color
         }
         else
         {
             this.innerHTML = player2Token
             isPLayer1Turn = true
-            document.querySelector('.status').innerHTML = "PlayerOne's turn"
-            document.querySelector('.status').style.backgroundColor = "teal"
+            document.querySelector('.status').innerHTML = `${player1Name}'s turn`
+            document.querySelector('.status').style.backgroundColor = player1Color
         }
+
         checkForWin()
     }
 }
@@ -125,8 +131,8 @@ const resetBoard = () =>
         square.innerHTML = ""
     })
     gameInProgress = true
-    document.querySelector('.status').innerHTML = "PlayerOne's turn"
-    document.querySelector('.status').style.backgroundColor = "teal"
+    document.querySelector('.status').innerHTML = `${player1Name}'s turn`
+    document.querySelector('.status').style.backgroundColor = player1Color
     isPLayer1Turn = true
     document.querySelector('.resetButton').style.display = "none"
     resetConfetti()
@@ -208,7 +214,116 @@ const keyDown = event =>
         explodeConfetti()
         setTimeout(resetConfetti, 5000)
     }
+}
 
+function selectOption()
+{
+    for (let i = 0; i < this.parentElement.children.length; i++)
+    {
+        this.parentElement.children[i].classList.remove('selected-option')
+    }
+    this.classList.add('selected-option')
+
+}
+
+const makePlayerAI = () =>
+{
+
+}
+
+const changeOnboardingForPlayerTwo = () =>
+{
+    let labels = document.querySelectorAll('.onboard-label')
+    console.log("labels.length:" + labels.length)
+    labels[0].innerHTML = 'Type a name for Player 2'
+    labels[1].innerHTML = 'Choose a color for Player 2'
+    labels[2].innerHTML = 'Choose a symbol for Player 2'
+    labels[3].innerHTML = 'Player 2 is human!'
+    let aiSection = document.querySelector('.aiSection')
+    aiSection.style.display = "none"
+    onboardPlayer = 2
+
+}
+
+const beginGame = () =>
+{
+    document.querySelector('.main').style.display = "flex"
+    document.querySelector('.onboarding-parent').style.display = "none"
+    resetBoard()
+}
+
+const createNewStyles = (nameOfNewClass, backgroundColor, selectionBorder) => {
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `.${nameOfNewClass} { background-color: ${backgroundColor}; }\n
+                        .${nameOfNewClass}Selection { outline-offset: 5px;
+                        outline: 5px dashed ${backgroundColor}; }`
+    document.getElementsByTagName('head')[0].appendChild(style);
+}
+
+
+const acceptChoices = () =>
+{
+    let selectedOptions = document.querySelectorAll('.selected-option')
+
+    if (selectedOptions.length == 3 && onboardPlayer == 1)
+    {
+        player1Name = document.querySelector('#playerName').value
+        document.querySelector('#playerName').value = ""
+        player1Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        player1Token = selectedOptions[1].innerHTML
+        if (selectedOptions[2].innerHTML == "Human")
+        {
+            console.log(player1Name + " " + player1Color + " " + player1Token + " Human")
+            selectedOptions.forEach(option =>
+            {
+                option.classList.remove('selected-option')
+            })
+            changeOnboardingForPlayerTwo()
+        }
+        else
+        {
+            onboardPlayer = 3
+            console.log(player1Name + " " + player1Color + " " + player1Token + " AI")
+            selectedOptions.forEach(option =>
+            {
+                option.classList.remove('selected-option')
+            })
+            makePlayerAI()
+        }
+
+    }
+    else if (selectedOptions.length == 2 && onboardPlayer == 2)
+    {
+        player2Name = document.querySelector('#playerName').value
+        document.querySelector('#playerName').value = ""
+        player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        player2Token = selectedOptions[1].innerHTML
+        console.log(player2Name + " " + player2Color + " " + player2Token + " Human")
+        beginGame()
+    }
+}
+
+const randomOptions = () =>
+{
+    createNewStyles()
+}
+
+
+
+const playerOnboarding = () =>
+{
+    document.querySelector('.main').style.display = "none"
+
+    randomOptions()
+
+    let options = document.querySelectorAll('.onboarding-option')
+    options.forEach(option =>
+    {
+        option.addEventListener('click', selectOption)
+    })
+    let acceptButton = document.querySelector('.onboard-accept')
+    acceptButton.addEventListener('click', acceptChoices)
 }
 
 const buildBoard = () =>
@@ -251,9 +366,12 @@ const buildBoard = () =>
         boardDiv.append(squareDiv)
     }
 
+
+
     prepareConfetti()
     resetConfetti()
     document.addEventListener('keyup', keyDown)
+    playerOnboarding()
 }
 
 buildBoard()

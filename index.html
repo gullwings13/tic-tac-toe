@@ -2,15 +2,42 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Tic Tac Toe</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
-  <script src="script.js"></script>
+<div class="onboarding-parent">
+    <div class="player-onboarding">
+        <div class="onboard-section nameSection">
+            <label class="onboard-label nameLabel">Type a name for Player 1</label>
+            <input type="text" placeholder="Type Name Here" id="playerName">
+        </div>
+        <div class="onboard-section colorSection">
+            <label class="onboard-label colorLabel">Choose a color for Player 1</label>
+            <div class="onboarding-option color1"></div>
+            <div class="onboarding-option color2"></div>
+            <div class="onboarding-option color3"></div>
+        </div>
+        <div class="onboard-section symbolSection">
+            <label class="onboard-label symbolLabel">Choose a symbol for Player 1</label>
+            <div class="onboarding-option symbol1">X</div>
+            <div class="onboarding-option symbol2">O</div>
+            <div class="onboarding-option symbol3">%</div>
+        </div>
+        <div class="onboard-section aiSection">
+            <label class="onboard-label aiLabel">Choose an option for Player 2</label>
+            <div class="onboarding-option human">Human</div>
+            <div class="onboarding-option ai1">AI-Easy</div>
+            <div class="onboarding-option ai2">AI-Hard</div>
+        </div>
+        <button class="onboard-button onboard-accept">Accept</button>
+    </div>
+</div>
+<script src="script.js"></script>
 </body>
 
 </html>
