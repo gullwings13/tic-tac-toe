@@ -12,22 +12,48 @@ let allConfetti = []
 
 let fadeFallTimeOut
 let onboardPlayer = 1
-let colorStartAngle = getRandomNumber(0,360)
+let colorStartAngle = getRandomNumber(0, 360)
 
 let playerTokens = [
     '<i class="fa fa-leaf"></i>',
+    '<i class="fa fa-circle"></i>',
     '<i class="fa fa-heart"></i>',
     '<i class="fa fa-times"></i>',
     '<i class="fa fa-star"></i>',
     '<i class="fa fa-music"></i>',
-    '<i class="fa fa-snowflake-o"></i>']
+    '<i class="fa fa-snowflake-o"></i>',
+    '<i class="fa fa-headphones"></i>',
+    '<i class="fa fa-camera"></i>',
+    '<i class="fa fa-align-justify"></i>',
+    '<i class="fa fa-video-camera"></i>',
+    '<i class="fa fa-adjust"></i>',
+    '<i class="fa fa-circle-o"></i>',
+    '<i class="fa fa-question-circle"></i>',
+    '<i class="fa fa-arrows"></i>',
+    '<i class="fa fa-snapchat-ghost"></i>',
+    '<i class="fa fa-smile-o"></i>',
+    '<i class="fa fa-code"></i>',
+    '<i class="fa fa-globe"></i>',
+    '<i class="fa fa-bolt"></i>',
+    '<i class="fa fa-money"></i>',
+    '<i class="fa fa-beer"></i>',
+    '<i class="fa fa-gamepad"></i>',
+    '<i class="fa fa-frown-o"></i>',
+    '<i class="fa fa-diamond"></i>',
+    '<i class="fa fa-genderless"></i>',
+    '<i class="fa fa-paint-brush"></i>',
+    '<i class="fa fa-glass"></i>',
+    '<i class="fa fa-gitlab"></i>',
+    '<i class="fa fa-edge"></i>'
+]
 
 let colors = []
 
 // Color helper functions from here:
 // https://github.com/kirupa/kirupa/blob/master/animations/hsla_complementary_color.htm
 
-function getRandomColor(h) {
+function getRandomColor(h)
+{
     // var h = [0, 360];
     var s = [80, 100];
     var l = [40, 60];
@@ -44,16 +70,18 @@ function getRandomColor(h) {
         l: lightness,
         a: alpha,
         hslaValue: getHSLAColor(hue, saturation, lightness, alpha),
-        hslaComplimentValue: getHSLAColor(hue-180, saturation, lightness, alpha)
+        hslaComplimentValue: getHSLAColor(hue - 180, saturation, lightness, alpha)
     }
 }
 
-function getRandomNumber(low, high) {
+function getRandomNumber(low, high)
+{
     let r = Math.floor(Math.random() * (high - low + 1)) + low;
     return r;
 }
 
-function getHSLAColor(h, s, l, a) {
+function getHSLAColor(h, s, l, a)
+{
     return `hsl(${h}, ${s}%, ${l}%, ${a})`;
 }
 
@@ -65,14 +93,13 @@ const createNewStyles = (nameOfNewClass, backgroundColor, fontColor) =>
     document.getElementsByTagName('head')[0].appendChild(style);
 }
 
-
 const randomOptions = () =>
 {
-    let playerFactor = onboardPlayer-1 // when player = 1 playerfactor 0, when player = 2, playerfactor = 1
-    let base = 180*playerFactor // base = 0 when player = 1, base = 180 when player = 2
-    let color1 = getRandomColor([colorStartAngle+base,colorStartAngle+base]) // random but alway seperate colors
-    let color2 = getRandomColor([colorStartAngle+60+base,colorStartAngle+60+base]) // random but alway seperate colors
-    let color3 = getRandomColor([colorStartAngle+120+base,colorStartAngle+120+base]) // random but alway seperate colors
+    let playerFactor = onboardPlayer - 1 // when player = 1 playerfactor 0, when player = 2, playerfactor = 1
+    let base = 180 * playerFactor // base = 0 when player = 1, base = 180 when player = 2
+    let color1 = getRandomColor([colorStartAngle + base, colorStartAngle + base]) // random but alway seperate colors
+    let color2 = getRandomColor([colorStartAngle + 60 + base, colorStartAngle + 60 + base]) // random but alway seperate colors
+    let color3 = getRandomColor([colorStartAngle + 120 + base, colorStartAngle + 120 + base]) // random but alway seperate colors
 
     createNewStyles('color1', color1.hslaValue, color1.hslaComplimentValue)
     createNewStyles('color2', color2.hslaValue, color2.hslaComplimentValue)
@@ -86,11 +113,12 @@ const randomOptions = () =>
     colors.push(color3.hslaComplimentValue)
 
     let symbols = document.querySelectorAll('.symbol-option')
-    let startIndex = getRandomNumber(0,playerTokens.length-1)
-    symbols.forEach(symbol => {
+    let startIndex = getRandomNumber(0, playerTokens.length - 1)
+    symbols.forEach(symbol =>
+    {
         symbol.innerHTML = playerTokens[startIndex]
         startIndex++
-        if(startIndex > playerTokens.length-1)
+        if (startIndex > playerTokens.length - 1)
         {
             startIndex = 0
         }
@@ -128,11 +156,10 @@ function selectOption()
     }
     this.classList.add('selected-option')
 
-    if(this.classList.contains('color-option'))
+    if (this.classList.contains('color-option'))
     {
         setOptionColorClass(this.classList[2])
     }
-
 
 }
 
@@ -159,7 +186,6 @@ const setOptionColorClass = colorClass =>
     })
 }
 
-
 const makePlayerAI = () =>
 {
 
@@ -170,14 +196,12 @@ const changeOnboardingForPlayerTwo = () =>
     onboardPlayer = 2
     randomOptions()
     let labels = document.querySelectorAll('.onboard-label')
-    //console.log("labels.length:" + labels.length)
     labels[0].innerHTML = 'Type a name for Player 2'
     labels[1].innerHTML = 'Choose a color for Player 2'
     labels[2].innerHTML = 'Choose a symbol for Player 2'
     labels[3].innerHTML = 'Player 2 is human!'
     let aiSection = document.querySelector('.aiSection')
     aiSection.style.display = "none"
-
 
 }
 
@@ -186,9 +210,8 @@ const endOnboardingBeginGame = () =>
     document.querySelector('.main').style.display = "flex"
     document.querySelector('.onboarding-parent').style.display = "none"
     resetBoard()
+    setHoverColor('player1colors')
 }
-
-
 
 const acceptChoices = () =>
 {
@@ -199,6 +222,8 @@ const acceptChoices = () =>
         player1Name = document.querySelector('#playerName').value == "" ? player1Name : document.querySelector('#playerName').value
         document.querySelector('#playerName').value = ""
         player1Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        let player1AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
+        createNewStyles('player1colors',player1Color, player1AltColor)
         player1Token = selectedOptions[1].innerHTML
         if (selectedOptions[2].innerHTML == "Human")
         {
@@ -226,11 +251,12 @@ const acceptChoices = () =>
         player2Name = document.querySelector('#playerName').value == "" ? player2Name : document.querySelector('#playerName').value
         document.querySelector('#playerName').value = ""
         player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        let player2AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
+        createNewStyles('player2colors',player2Color, player2AltColor)
         player2Token = selectedOptions[1].innerHTML
         endOnboardingBeginGame()
     }
 }
-
 
 function addClass(event)
 {
@@ -438,6 +464,13 @@ const keyDown = event =>
         explodeConfetti()
         setTimeout(resetConfetti, 5000)
     }
+}
+
+const setHoverColor = newColorClass =>
+{
+    gameBoardArray.forEach(square => {
+        square.newClass = newColorClass
+    })
 }
 
 const buildBoard = () =>
