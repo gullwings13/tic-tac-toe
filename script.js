@@ -1,22 +1,236 @@
 let isPLayer1Turn = true
-let player1Name = 'Bob'
-let player2Name = 'Ken'
+let player1Name = 'Player One'
+let player2Name = 'Player Two'
 let player1Color = 'rgba(255,0,0,1)'
 let player2Color = 'rgba(0,255,0,1)'
 let player1Token = 'X'
 let player2Token = 'O'
+let clicks = 0
 let gameBoardArray = []
 let gameInProgress = true
 let allConfetti = []
-let confettiColors = [
-    'rgba(28, 141, 255, 1)',
-    'rgba(34, 204, 28, 1)',
-    'rgba(215, 38, 61, 1)',
-    'rgba(95, 45, 142, 1)',
-    'rgba(242, 193, 78, 1)']
 
 let fadeFallTimeOut
 let onboardPlayer = 1
+let colorStartAngle = getRandomNumber(0,360)
+
+let playerTokens = [
+    '<i class="fa fa-leaf"></i>',
+    '<i class="fa fa-heart"></i>',
+    '<i class="fa fa-times"></i>',
+    '<i class="fa fa-star"></i>',
+    '<i class="fa fa-music"></i>',
+    '<i class="fa fa-snowflake-o"></i>']
+
+let colors = []
+
+// Color helper functions from here:
+// https://github.com/kirupa/kirupa/blob/master/animations/hsla_complementary_color.htm
+
+function getRandomColor(h) {
+    // var h = [0, 360];
+    var s = [80, 100];
+    var l = [40, 60];
+    var a = [1, 1];
+
+    let hue = getRandomNumber(h[0], h[1]);
+    let saturation = getRandomNumber(s[0], s[1]);
+    let lightness = getRandomNumber(l[0], l[1]);
+    let alpha = getRandomNumber(a[0] * 100, a[1] * 100) / 100;
+
+    return {
+        h: hue,
+        s: saturation,
+        l: lightness,
+        a: alpha,
+        hslaValue: getHSLAColor(hue, saturation, lightness, alpha),
+        hslaComplimentValue: getHSLAColor(hue-180, saturation, lightness, alpha)
+    }
+}
+
+function getRandomNumber(low, high) {
+    let r = Math.floor(Math.random() * (high - low + 1)) + low;
+    return r;
+}
+
+function getHSLAColor(h, s, l, a) {
+    return `hsl(${h}, ${s}%, ${l}%, ${a})`;
+}
+
+const createNewStyles = (nameOfNewClass, backgroundColor, fontColor) =>
+{
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `.${nameOfNewClass} { background-color: ${backgroundColor}; color: ${fontColor}`
+    document.getElementsByTagName('head')[0].appendChild(style);
+}
+
+
+const randomOptions = () =>
+{
+    let playerFactor = onboardPlayer-1 // when player = 1 playerfactor 0, when player = 2, playerfactor = 1
+    let base = 180*playerFactor // base = 0 when player = 1, base = 180 when player = 2
+    let color1 = getRandomColor([colorStartAngle+base,colorStartAngle+base]) // random but alway seperate colors
+    let color2 = getRandomColor([colorStartAngle+60+base,colorStartAngle+60+base]) // random but alway seperate colors
+    let color3 = getRandomColor([colorStartAngle+120+base,colorStartAngle+120+base]) // random but alway seperate colors
+
+    createNewStyles('color1', color1.hslaValue, color1.hslaComplimentValue)
+    createNewStyles('color2', color2.hslaValue, color2.hslaComplimentValue)
+    createNewStyles('color3', color3.hslaValue, color3.hslaComplimentValue)
+
+    colors.push(color1.hslaValue)
+    colors.push(color2.hslaValue)
+    colors.push(color3.hslaValue)
+    colors.push(color1.hslaComplimentValue)
+    colors.push(color2.hslaComplimentValue)
+    colors.push(color3.hslaComplimentValue)
+
+    let symbols = document.querySelectorAll('.symbol-option')
+    let startIndex = getRandomNumber(0,playerTokens.length-1)
+    symbols.forEach(symbol => {
+        symbol.innerHTML = playerTokens[startIndex]
+        startIndex++
+        if(startIndex > playerTokens.length-1)
+        {
+            startIndex = 0
+        }
+    })
+
+    setOptionColorClass('color1')
+}
+
+const playerOnboarding = () =>
+{
+    document.querySelector('.main').style.display = "none"
+
+    randomOptions()
+    selectionOptionOne()
+
+    let options = document.querySelectorAll('.onboarding-option')
+    options.forEach(option =>
+    {
+        option.addEventListener('click', selectOption)
+    })
+    let acceptButton = document.querySelector('.onboard-accept')
+    acceptButton.addEventListener('click', acceptChoices)
+}
+
+const selectionOptionOne = () =>
+{
+
+}
+
+function selectOption()
+{
+    for (let i = 0; i < this.parentElement.children.length; i++)
+    {
+        this.parentElement.children[i].classList.remove('selected-option')
+    }
+    this.classList.add('selected-option')
+
+    if(this.classList.contains('color-option'))
+    {
+        setOptionColorClass(this.classList[2])
+    }
+
+
+}
+
+const setOptionColorClass = colorClass =>
+{
+    let symbolOptions = document.querySelectorAll('.symbol-option')
+
+    symbolOptions.forEach(option =>
+    {
+        option.classList.remove('color1')
+        option.classList.remove('color2')
+        option.classList.remove('color3')
+        option.classList.add(colorClass)
+    })
+
+    let aiOptions = document.querySelectorAll('.ai-option')
+
+    aiOptions.forEach(option =>
+    {
+        option.classList.remove('color1')
+        option.classList.remove('color2')
+        option.classList.remove('color3')
+        option.classList.add(colorClass)
+    })
+}
+
+
+const makePlayerAI = () =>
+{
+
+}
+
+const changeOnboardingForPlayerTwo = () =>
+{
+    onboardPlayer = 2
+    randomOptions()
+    let labels = document.querySelectorAll('.onboard-label')
+    //console.log("labels.length:" + labels.length)
+    labels[0].innerHTML = 'Type a name for Player 2'
+    labels[1].innerHTML = 'Choose a color for Player 2'
+    labels[2].innerHTML = 'Choose a symbol for Player 2'
+    labels[3].innerHTML = 'Player 2 is human!'
+    let aiSection = document.querySelector('.aiSection')
+    aiSection.style.display = "none"
+
+
+}
+
+const endOnboardingBeginGame = () =>
+{
+    document.querySelector('.main').style.display = "flex"
+    document.querySelector('.onboarding-parent').style.display = "none"
+    resetBoard()
+}
+
+
+
+const acceptChoices = () =>
+{
+    let selectedOptions = document.querySelectorAll('.selected-option')
+
+    if (selectedOptions.length == 3 && onboardPlayer == 1)
+    {
+        player1Name = document.querySelector('#playerName').value == "" ? player1Name : document.querySelector('#playerName').value
+        document.querySelector('#playerName').value = ""
+        player1Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        player1Token = selectedOptions[1].innerHTML
+        if (selectedOptions[2].innerHTML == "Human")
+        {
+            //console.log(player1Name + " " + player1Color + " " + player1Token + " Human")
+            selectedOptions.forEach(option =>
+            {
+                option.classList.remove('selected-option')
+            })
+            changeOnboardingForPlayerTwo()
+        }
+        else
+        {
+            onboardPlayer = 3
+            //console.log(player1Name + " " + player1Color + " " + player1Token + " AI")
+            selectedOptions.forEach(option =>
+            {
+                option.classList.remove('selected-option')
+            })
+            makePlayerAI()
+        }
+
+    }
+    else if (selectedOptions.length == 2 && onboardPlayer == 2)
+    {
+        player2Name = document.querySelector('#playerName').value == "" ? player2Name : document.querySelector('#playerName').value
+        document.querySelector('#playerName').value = ""
+        player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        player2Token = selectedOptions[1].innerHTML
+        endOnboardingBeginGame()
+    }
+}
+
 
 function addClass(event)
 {
@@ -45,6 +259,14 @@ const checkForWin = () =>
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
         explodeConfetti()
+    }
+    else if (clicks >= 9)
+    {
+        // draw and no winner
+        document.querySelector('.status').innerHTML = `No winner`
+        document.querySelector('.status').style.backgroundColor = "yellow"
+        document.querySelector('.resetButton').style.display = "block"
+        gameInProgress = false
     }
 }
 
@@ -119,7 +341,8 @@ function squareClicked() // avoid arrow function to make use of the this propert
             document.querySelector('.status').innerHTML = `${player1Name}'s turn`
             document.querySelector('.status').style.backgroundColor = player1Color
         }
-
+        clicks++
+        console.log(clicks)
         checkForWin()
     }
 }
@@ -136,6 +359,7 @@ const resetBoard = () =>
     isPLayer1Turn = true
     document.querySelector('.resetButton').style.display = "none"
     resetConfetti()
+    clicks = 0
 }
 
 const prepareConfetti = () =>
@@ -173,7 +397,7 @@ const explodeConfetti = () =>
         let rotateValue = Math.random() * 360 + 360
         let translateValue = Math.random() * (radius * 2) - radius
         confetti.style.transform = ' translate3d(0,0,' + translateValue + 'px)' + ' rotate3d(1, 1, 1, ' + rotateValue + 'deg)'
-        confetti.style.backgroundColor = confettiColors[Math.round(Math.random() * (confettiColors.length - 1))]
+        confetti.style.backgroundColor = colors[Math.round(Math.random() * (colors.length - 1))]
     })
     fadeFallTimeOut = setTimeout(fallAndFadeConfetti, 200)
 }
@@ -216,116 +440,6 @@ const keyDown = event =>
     }
 }
 
-function selectOption()
-{
-    for (let i = 0; i < this.parentElement.children.length; i++)
-    {
-        this.parentElement.children[i].classList.remove('selected-option')
-    }
-    this.classList.add('selected-option')
-
-}
-
-const makePlayerAI = () =>
-{
-
-}
-
-const changeOnboardingForPlayerTwo = () =>
-{
-    let labels = document.querySelectorAll('.onboard-label')
-    console.log("labels.length:" + labels.length)
-    labels[0].innerHTML = 'Type a name for Player 2'
-    labels[1].innerHTML = 'Choose a color for Player 2'
-    labels[2].innerHTML = 'Choose a symbol for Player 2'
-    labels[3].innerHTML = 'Player 2 is human!'
-    let aiSection = document.querySelector('.aiSection')
-    aiSection.style.display = "none"
-    onboardPlayer = 2
-
-}
-
-const beginGame = () =>
-{
-    document.querySelector('.main').style.display = "flex"
-    document.querySelector('.onboarding-parent').style.display = "none"
-    resetBoard()
-}
-
-const createNewStyles = (nameOfNewClass, backgroundColor, selectionBorder) => {
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = `.${nameOfNewClass} { background-color: ${backgroundColor}; }\n
-                        .${nameOfNewClass}Selection { outline-offset: 5px;
-                        outline: 5px dashed ${backgroundColor}; }`
-    document.getElementsByTagName('head')[0].appendChild(style);
-}
-
-
-const acceptChoices = () =>
-{
-    let selectedOptions = document.querySelectorAll('.selected-option')
-
-    if (selectedOptions.length == 3 && onboardPlayer == 1)
-    {
-        player1Name = document.querySelector('#playerName').value
-        document.querySelector('#playerName').value = ""
-        player1Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
-        player1Token = selectedOptions[1].innerHTML
-        if (selectedOptions[2].innerHTML == "Human")
-        {
-            console.log(player1Name + " " + player1Color + " " + player1Token + " Human")
-            selectedOptions.forEach(option =>
-            {
-                option.classList.remove('selected-option')
-            })
-            changeOnboardingForPlayerTwo()
-        }
-        else
-        {
-            onboardPlayer = 3
-            console.log(player1Name + " " + player1Color + " " + player1Token + " AI")
-            selectedOptions.forEach(option =>
-            {
-                option.classList.remove('selected-option')
-            })
-            makePlayerAI()
-        }
-
-    }
-    else if (selectedOptions.length == 2 && onboardPlayer == 2)
-    {
-        player2Name = document.querySelector('#playerName').value
-        document.querySelector('#playerName').value = ""
-        player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
-        player2Token = selectedOptions[1].innerHTML
-        console.log(player2Name + " " + player2Color + " " + player2Token + " Human")
-        beginGame()
-    }
-}
-
-const randomOptions = () =>
-{
-    createNewStyles()
-}
-
-
-
-const playerOnboarding = () =>
-{
-    document.querySelector('.main').style.display = "none"
-
-    randomOptions()
-
-    let options = document.querySelectorAll('.onboarding-option')
-    options.forEach(option =>
-    {
-        option.addEventListener('click', selectOption)
-    })
-    let acceptButton = document.querySelector('.onboard-accept')
-    acceptButton.addEventListener('click', acceptChoices)
-}
-
 const buildBoard = () =>
 {
     let mainDiv = document.createElement('div')
@@ -365,8 +479,6 @@ const buildBoard = () =>
         squareDiv.addEventListener('click', squareClicked)
         boardDiv.append(squareDiv)
     }
-
-
 
     prepareConfetti()
     resetConfetti()

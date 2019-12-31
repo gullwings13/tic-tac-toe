@@ -1,16 +1,20 @@
 * {
     padding: 0;
     margin: 0;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 .square {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 1px;
     height:100px;
     width:100px;
-    border: 1px black solid;
+    /*border: 1px black solid;*/
+    background-color: #f5f5f5;
     transition: background-color 0.1s;
+    font-size: 50px;
 }
 
 .board{
@@ -101,6 +105,17 @@ button{
     height: 50px;
     margin: 10px;
     border: #1B0B17 solid 1px;
+    text-align: center;
+}
+
+.symbol-option{
+    display:inline-block;
+    font-size: 40px;
+    line-height: 50px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    vertical-align: bottom;
 }
 
 .onboard-button{
@@ -110,7 +125,7 @@ button{
 
 .selected-option{
     outline-offset: 5px;
-    outline: 5px dashed blue;
+    outline: 5px dashed;
 }
 
 .color1{
