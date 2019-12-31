@@ -32,7 +32,7 @@ let playerTokens = [
     '<i class="fa fa-heart"></i>',
     '<i class="fa fa-times"></i>',
     '<i class="fa fa-star"></i>',
-    '<i class="fa fa-music"></i>',
+    '<i class="fab fa-itunes-note"></i>',
     '<i class="fa fa-snowflake-o"></i>',
     '<i class="fa fa-headphones"></i>',
     '<i class="fa fa-camera"></i>',
@@ -53,7 +53,21 @@ let playerTokens = [
     '<i class="fa fa-diamond"></i>',
     '<i class="fa fa-genderless"></i>',
     '<i class="fa fa-paint-brush"></i>',
-    '<i class="fa fa-glass"></i>'
+    '<i class="fa fa-glass"></i>',
+    '<i class="fab fa-angular"></i>',
+    '<i class="fab fa-apple"></i>',
+    '<i class="fab fa-canadian-maple-leaf"></i>',
+    '<i class="fab fa-chrome"></i>',
+    '<i class="fab fa-firefox-browser"></i>',
+    '<i class="fab fa-internet-explorer"></i>',
+    '<i class="fab fa-jedi-order"></i>',
+    '<i class="fab fa-empire"></i>',
+    '<i class="fab fa-itch-io"></i>',
+    '<i class="fab fa-gitlab"></i>',
+    '<i class="fab fa-rebel"></i>',
+    '<i class="fab fa-xbox"></i>',
+    '<i class="fab fa-playstation"></i>'
+
 ]
 
 let colors = []
@@ -154,7 +168,7 @@ const playerOnboarding = () =>
 
 const selectionOptionOne = () =>
 {
-
+    let sections = document.querySelectorAll('.onboard-section')
 }
 
 function selectOption()
@@ -169,7 +183,6 @@ function selectOption()
     {
         setOptionColorClass(this.classList[2])
     }
-
 }
 
 const setOptionColorClass = colorClass =>
@@ -205,13 +218,20 @@ const changeOnboardingForPlayerTwo = () =>
     onboardPlayer = 2
     randomOptions()
     let labels = document.querySelectorAll('.onboard-label')
-    labels[0].innerHTML = 'Type a name for Player 2'
-    labels[1].innerHTML = 'Choose a color for Player 2'
-    labels[2].innerHTML = 'Choose a symbol for Player 2'
-    labels[3].innerHTML = 'Player 2 is human!'
-    let aiSection = document.querySelector('.aiSection')
-    aiSection.style.display = "none"
+    // labels[0].innerHTML = 'Type a name for Player 2'
+    labels[0].innerHTML = 'Player 2 color'
+    labels[1].innerHTML = 'Player 2 decal'
+    labels[2].innerHTML = 'Player 2 type'
+}
 
+const setHoverColor = newColorClass =>
+{
+    gameBoardArray.forEach(square => {
+        if(square.innerHTML == "")
+        {
+            square.newClass = newColorClass
+        }
+    })
 }
 
 const endOnboardingBeginGame = () =>
@@ -232,6 +252,14 @@ const customizePlayer = (playerObject, selectedOptions) =>
     playerObject.token = selectedOptions[1].innerHTML
 }
 
+const removeSelection = selectedOptions =>
+{
+    selectedOptions.forEach(option =>
+    {
+        option.classList.remove('selected-option')
+    })
+}
+
 const acceptChoices = () =>
 {
     let selectedOptions = document.querySelectorAll('.selected-option')
@@ -239,36 +267,38 @@ const acceptChoices = () =>
     if (selectedOptions.length == 3 && onboardPlayer == 1)
     {
         customizePlayer(player1, selectedOptions)
+        console.log(selectedOptions)
         document.querySelector('#playerName').value = ""
-        if (selectedOptions[2].innerHTML == "Human")
+        if (selectedOptions[2].innerHTML == '<div class="ai-option-text">Human</div>')
         {
-            selectedOptions.forEach(option =>
-            {
-                option.classList.remove('selected-option')
-            })
+            removeSelection(selectedOptions)
+            console.log('player one human')
             changeOnboardingForPlayerTwo()
         }
         else
         {
-            onboardPlayer = 3
-            selectedOptions.forEach(option =>
-            {
-                option.classList.remove('selected-option')
-            })
-            makePlayerAI()
+            // onboardPlayer = 3
+            //removeSelection(selectedOptions)
+            //makePlayerAI()
         }
 
     }
-    else if (selectedOptions.length == 2 && onboardPlayer == 2)
+    else if (selectedOptions.length == 3 && onboardPlayer == 2)
     {
         customizePlayer(player2, selectedOptions)
         document.querySelector('#playerName').value = ""
-        // player2Name = document.querySelector('#playerName').value == "" ? player2Name : document.querySelector('#playerName').value
-        // player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
-        // let player2AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
-        // createNewStyles('player2colors',player2Color, player2AltColor)
-        // player2Token = selectedOptions[1].innerHTML
-        endOnboardingBeginGame()
+        if (selectedOptions[2].innerHTML == '<div class="ai-option-text">Human</div>')
+        {
+            removeSelection(selectedOptions)
+            endOnboardingBeginGame()
+        }
+        else
+        {
+            // onboardPlayer = 4
+            //removeSelection(selectedOptions)
+            //makePlayerAI()
+        }
+
     }
 }
 
@@ -290,6 +320,7 @@ const checkForWin = () =>
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
+        setHoverColor('none')
         explodeConfetti()
     }
     else if (checkBoard(player2.token))
@@ -298,6 +329,7 @@ const checkForWin = () =>
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
+        setHoverColor('none')
         explodeConfetti()
     }
     else if (clicks >= 9)
@@ -306,6 +338,7 @@ const checkForWin = () =>
         document.querySelector('.status').innerHTML = `No winner`
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
+        setHoverColor('none')
         gameInProgress = false
     }
 }
@@ -397,6 +430,9 @@ const resetBoard = () =>
     gameBoardArray.forEach(square =>
     {
         square.innerHTML = ""
+        square.classList.remove('player-1-colors')
+        square.classList.remove('player-2-colors')
+        square.newClass = 'player-1-colors-hover'
     })
     gameInProgress = true
     document.querySelector('.status').innerHTML = `${player1.name}'s turn`
@@ -410,13 +446,16 @@ const resetBoard = () =>
 const prepareConfetti = () =>
 {
     let amountOfConfetti = 60
+    let confetti = document.createElement('div')
     for (let i = 0; i < amountOfConfetti; i++)
     {
         let newConfetti = document.createElement('div')
         newConfetti.classList.add('confetti')
         allConfetti.push(newConfetti)
-        document.body.append(newConfetti)
+        confetti.append(newConfetti)
+
     }
+    document.body.append(confetti)
 }
 
 // from stack overflow: https://stackoverflow.com/questions/442404/retrieve-the-position-x-y-of-an-html-element
@@ -485,18 +524,17 @@ const resetConfetti = () =>
 //     }
 // }
 
-const setHoverColor = newColorClass =>
-{
-    gameBoardArray.forEach(square => {
-        square.newClass = newColorClass
-    })
-}
+
 
 const buildBoard = () =>
 {
+    let mainParentDiv = document.createElement('div')
+    mainParentDiv.classList.add('main-parent')
+    document.body.append(mainParentDiv)
+
     let mainDiv = document.createElement('div')
     mainDiv.classList.add('main')
-    document.body.append(mainDiv)
+    mainParentDiv.append(mainDiv)
 
     let statusDiv = document.createElement('div')
     statusDiv.classList.add('status')
