@@ -1,10 +1,22 @@
 let isPLayer1Turn = true
-let player1Name = 'Player One'
-let player2Name = 'Player Two'
-let player1Color = 'rgba(255,0,0,1)'
-let player2Color = 'rgba(0,255,0,1)'
-let player1Token = 'X'
-let player2Token = 'O'
+let player1 = {
+    id: 1,
+    colorClassName: 'player-1-colors',
+    name: 'Player One',
+    mainColor: 'rgba(255,0,0,1)',
+    altColor: 'rgba(0,0,255,1)',
+    token: 'X'
+}
+
+let player2 = {
+    id: 2,
+    colorClassName: 'player-2-colors',
+    name: 'Player Two',
+    mainColor: 'rgba(255,255,0,1)',
+    altColor: 'rgba(0,255,255,1)',
+    token: 'O'
+}
+
 let clicks = 0
 let gameBoardArray = []
 let gameInProgress = true
@@ -30,7 +42,6 @@ let playerTokens = [
     '<i class="fa fa-circle-o"></i>',
     '<i class="fa fa-question-circle"></i>',
     '<i class="fa fa-arrows"></i>',
-    '<i class="fa fa-snapchat-ghost"></i>',
     '<i class="fa fa-smile-o"></i>',
     '<i class="fa fa-code"></i>',
     '<i class="fa fa-globe"></i>',
@@ -42,9 +53,7 @@ let playerTokens = [
     '<i class="fa fa-diamond"></i>',
     '<i class="fa fa-genderless"></i>',
     '<i class="fa fa-paint-brush"></i>',
-    '<i class="fa fa-glass"></i>',
-    '<i class="fa fa-gitlab"></i>',
-    '<i class="fa fa-edge"></i>'
+    '<i class="fa fa-glass"></i>'
 ]
 
 let colors = []
@@ -210,7 +219,17 @@ const endOnboardingBeginGame = () =>
     document.querySelector('.main').style.display = "flex"
     document.querySelector('.onboarding-parent').style.display = "none"
     resetBoard()
-    setHoverColor('player1colors')
+    setHoverColor('player-1-colors-hover')
+}
+
+const customizePlayer = (playerObject, selectedOptions) =>
+{
+    playerObject.name = document.querySelector('#playerName').value == "" ? player1.name : document.querySelector('#playerName').value
+    playerObject.mainColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+    playerObject.altColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
+    createNewStyles(playerObject.colorClassName,playerObject.mainColor, playerObject.altColor)
+    createNewStyles(playerObject.colorClassName+'-hover',playerObject.mainColor, playerObject.altColor)
+    playerObject.token = selectedOptions[1].innerHTML
 }
 
 const acceptChoices = () =>
@@ -219,15 +238,10 @@ const acceptChoices = () =>
 
     if (selectedOptions.length == 3 && onboardPlayer == 1)
     {
-        player1Name = document.querySelector('#playerName').value == "" ? player1Name : document.querySelector('#playerName').value
+        customizePlayer(player1, selectedOptions)
         document.querySelector('#playerName').value = ""
-        player1Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
-        let player1AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
-        createNewStyles('player1colors',player1Color, player1AltColor)
-        player1Token = selectedOptions[1].innerHTML
         if (selectedOptions[2].innerHTML == "Human")
         {
-            //console.log(player1Name + " " + player1Color + " " + player1Token + " Human")
             selectedOptions.forEach(option =>
             {
                 option.classList.remove('selected-option')
@@ -237,7 +251,6 @@ const acceptChoices = () =>
         else
         {
             onboardPlayer = 3
-            //console.log(player1Name + " " + player1Color + " " + player1Token + " AI")
             selectedOptions.forEach(option =>
             {
                 option.classList.remove('selected-option')
@@ -248,12 +261,13 @@ const acceptChoices = () =>
     }
     else if (selectedOptions.length == 2 && onboardPlayer == 2)
     {
-        player2Name = document.querySelector('#playerName').value == "" ? player2Name : document.querySelector('#playerName').value
+        customizePlayer(player2, selectedOptions)
         document.querySelector('#playerName').value = ""
-        player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
-        let player2AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
-        createNewStyles('player2colors',player2Color, player2AltColor)
-        player2Token = selectedOptions[1].innerHTML
+        // player2Name = document.querySelector('#playerName').value == "" ? player2Name : document.querySelector('#playerName').value
+        // player2Color = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('background-color');
+        // let player2AltColor = window.getComputedStyle(selectedOptions[0], null).getPropertyValue('color');
+        // createNewStyles('player2colors',player2Color, player2AltColor)
+        // player2Token = selectedOptions[1].innerHTML
         endOnboardingBeginGame()
     }
 }
@@ -270,17 +284,17 @@ function removeClass(event)
 
 const checkForWin = () =>
 {
-    if (checkBoard(player1Token))
+    if (checkBoard(player1.token))
     {
-        document.querySelector('.status').innerHTML = `${player1Name} wins!!!`
+        document.querySelector('.status').innerHTML = `${player1.name} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
         explodeConfetti()
     }
-    else if (checkBoard(player2Token))
+    else if (checkBoard(player2.token))
     {
-        document.querySelector('.status').innerHTML = `${player2Name} wins!!!`
+        document.querySelector('.status').innerHTML = `${player2.name} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
         document.querySelector('.resetButton').style.display = "block"
         gameInProgress = false
@@ -353,19 +367,24 @@ function squareClicked() // avoid arrow function to make use of the this propert
 {
     if (this.innerHTML == '' && gameInProgress)
     {
+
         if (isPLayer1Turn)
         {
-            this.innerHTML = player1Token
+            this.innerHTML = player1.token
+            this.classList.add('player-1-colors')
             isPLayer1Turn = false
-            document.querySelector('.status').innerHTML = `${player2Name}'s turn`
-            document.querySelector('.status').style.backgroundColor = player2Color
+            document.querySelector('.status').innerHTML = `${player2.name}'s turn`
+            document.querySelector('.status').style.backgroundColor = player2.color
+            setHoverColor('player-2-colors-hover')
         }
         else
         {
-            this.innerHTML = player2Token
+            this.innerHTML = player2.token
+            this.classList.add('player-2-colors')
             isPLayer1Turn = true
-            document.querySelector('.status').innerHTML = `${player1Name}'s turn`
-            document.querySelector('.status').style.backgroundColor = player1Color
+            document.querySelector('.status').innerHTML = `${player1.name}'s turn`
+            document.querySelector('.status').style.backgroundColor = player1.color
+            setHoverColor('player-1-colors-hover')
         }
         clicks++
         console.log(clicks)
@@ -380,8 +399,8 @@ const resetBoard = () =>
         square.innerHTML = ""
     })
     gameInProgress = true
-    document.querySelector('.status').innerHTML = `${player1Name}'s turn`
-    document.querySelector('.status').style.backgroundColor = player1Color
+    document.querySelector('.status').innerHTML = `${player1.name}'s turn`
+    document.querySelector('.status').style.backgroundColor = player1.color
     isPLayer1Turn = true
     document.querySelector('.resetButton').style.display = "none"
     resetConfetti()
@@ -457,14 +476,14 @@ const resetConfetti = () =>
     })
 }
 
-const keyDown = event =>
-{
-    if (event.key == 'x')
-    {
-        explodeConfetti()
-        setTimeout(resetConfetti, 5000)
-    }
-}
+// const keyDown = event =>
+// {
+//     if (event.key == 'x')
+//     {
+//         explodeConfetti()
+//         setTimeout(resetConfetti, 5000)
+//     }
+// }
 
 const setHoverColor = newColorClass =>
 {
@@ -506,7 +525,7 @@ const buildBoard = () =>
         squareDiv.classList.add('square')
         squareDiv.id = i
         gameBoardArray.push(squareDiv)
-        squareDiv.newClass = "grey"
+        squareDiv.newClass = "player-1-colors-hover"
         squareDiv.addEventListener('mouseover', addClass)
         squareDiv.addEventListener('mouseout', removeClass)
         squareDiv.addEventListener('click', squareClicked)
@@ -515,7 +534,7 @@ const buildBoard = () =>
 
     prepareConfetti()
     resetConfetti()
-    document.addEventListener('keyup', keyDown)
+    // document.addEventListener('keyup', keyDown)
     playerOnboarding()
 }
 
