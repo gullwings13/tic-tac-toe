@@ -13,7 +13,8 @@ const buildPlayers = () =>
         token: 'X',
         ai: false,
         aiLevel: 0,
-        opponent: player2
+        opponent: player2,
+        score: 0
     }
 
     player2 = {
@@ -25,7 +26,8 @@ const buildPlayers = () =>
         token: 'O',
         ai: false,
         aiLevel: 0,
-        opponent: player1
+        opponent: player1,
+        score: 0
     }
 
     player1.opponent = player2
@@ -170,6 +172,7 @@ const redoOnboarding = () =>
 {
     player1.ai = false
     player2.ai = false
+    resetScores()
     resetBoard()
     onboardPlayer = 1
     changeOnboardingForPlayerOne()
@@ -377,6 +380,8 @@ const checkForWin = () =>
         document.querySelector('.play-again-button').style.display = "block"
         gameInProgress = false
         setHoverColor('none')
+        player1.score++
+        displayScores()
         explodeConfetti()
     }
     else if (checkBoard(player2.token, gameBoardArray))
@@ -387,6 +392,8 @@ const checkForWin = () =>
         document.querySelector('.play-again-button').style.display = "block"
         gameInProgress = false
         setHoverColor('none')
+        player2.score++
+        displayScores()
         explodeConfetti()
     }
     else if (turns >= 9)
@@ -398,9 +405,28 @@ const checkForWin = () =>
         document.querySelector('.play-again-button').style.display = "block"
         gameInProgress = false
         setHoverColor('none')
-
+        displayScores()
     }
 }
+
+const displayScores = () =>
+{
+    let scorep1 = document.querySelector('.score-p1')
+    scorep1.innerHTML = `${player1.chosenName}: ${player1.score}`
+    let scorep2 = document.querySelector('.score-p2')
+    scorep2.innerHTML = `${player2.chosenName}: ${player2.score}`
+}
+
+const resetScores = () =>
+{
+    let scorep1 = document.querySelector('.score-p1')
+    scorep1.innerHTML = ``
+    player1.score = 0
+    let scorep2 = document.querySelector('.score-p2')
+    scorep2.innerHTML = ``
+    player2.score = 0
+}
+
 
 //   Game Board
 //
@@ -491,7 +517,7 @@ const minimax = (depth, isMaximizing, playerObject) =>
         console.log(depth)
         return 0
     }
-    else if( depth > 4)
+    else if (depth > 5)
     {
         return 0
     }
