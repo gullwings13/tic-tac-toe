@@ -606,7 +606,7 @@ const aiTurn = (playerObject) =>
 
     if (playerObject.opponent.ai == true && gameInProgress == true)
     {
-        aiTurn(playerObject.opponent)
+        setTimeout(aiTurn, 200, (playerObject.opponent))
     }
 
 }
