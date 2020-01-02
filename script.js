@@ -27,6 +27,9 @@ const buildPlayers = () =>
         aiLevel: 0,
         opponent: player1
     }
+
+    player1.opponent = player2
+    player2.opponent = player1
 }
 
 buildPlayers()
@@ -81,9 +84,9 @@ let playerTokens = [
     '<i class="fab fa-rebel"></i>',
     '<i class="fab fa-xbox"></i>',
     '<i class="fab fa-playstation"></i>'
-
 ]
 
+let startIndex = getRandomNumber(0, playerTokens.length - 1)
 let colors = []
 
 // Color helper functions from here:
@@ -150,7 +153,6 @@ const randomOptions = () =>
     colors.push(color3.hslaComplimentValue)
 
     let symbols = document.querySelectorAll('.symbol-option')
-    let startIndex = getRandomNumber(0, playerTokens.length - 1)
     symbols.forEach(symbol =>
     {
         symbol.innerHTML = playerTokens[startIndex]
@@ -166,6 +168,8 @@ const randomOptions = () =>
 
 const redoOnboarding = () =>
 {
+    player1.ai = false
+    player2.ai = false
     resetBoard()
     onboardPlayer = 1
     changeOnboardingForPlayerOne()
@@ -236,7 +240,6 @@ const setOptionColorClass = colorClass =>
     })
 }
 
-
 const changeOnboardingForPlayerOne = () =>
 {
     randomOptions()
@@ -275,8 +278,8 @@ const endOnboardingBeginGame = () =>
 {
     document.querySelector('.main').style.display = "flex"
     document.querySelector('.onboarding-parent').style.display = "none"
-    resetBoard()
     setHoverColor('player-1-colors-hover')
+    resetBoard()
 }
 
 const customizePlayer = (playerObject, selectedOptions) =>
@@ -314,6 +317,14 @@ const acceptChoices = () =>
         else
         {
             player1.ai = true;
+            if (selectedOptions[2].classList.contains('ai0'))
+            {
+                player1.aiLevel = 0
+            }
+            else if (selectedOptions[2].classList.contains('ai1'))
+            {
+                player1.aiLevel = 1
+            }
             removeSelection(selectedOptions)
             changeOnboardingForPlayerTwo()
         }
@@ -331,6 +342,14 @@ const acceptChoices = () =>
         else
         {
             player2.ai = true
+            if (selectedOptions[2].classList.contains('ai0'))
+            {
+                player2.aiLevel = 0
+            }
+            else if (selectedOptions[2].classList.contains('ai1'))
+            {
+                player2.aiLevel = 1
+            }
             removeSelection(selectedOptions)
             endOnboardingBeginGame()
         }
@@ -350,7 +369,7 @@ function removeClass(event)
 
 const checkForWin = () =>
 {
-    if (checkBoard(player1.token))
+    if (checkBoard(player1.token, gameBoardArray))
     {
         document.querySelector('.status').innerHTML = `${player1.chosenName} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
@@ -360,7 +379,7 @@ const checkForWin = () =>
         setHoverColor('none')
         explodeConfetti()
     }
-    else if (checkBoard(player2.token))
+    else if (checkBoard(player2.token, gameBoardArray))
     {
         document.querySelector('.status').innerHTML = `${player2.chosenName} wins!!!`
         document.querySelector('.status').style.backgroundColor = "yellow"
@@ -389,11 +408,10 @@ const checkForWin = () =>
 //     3|4|5
 //     6|7|8
 
-const checkBoard = playerToken =>
+const checkBoard = (playerToken) =>
 {
     let gba = gameBoardArray
     let pt = playerToken
-    //console.log(pt)
 
     if (gba[0].innerHTML == pt && gba[1].innerHTML == pt && gba[2].innerHTML == pt) //1
     {
@@ -437,28 +455,134 @@ const checkBoard = playerToken =>
     }
 }
 
-
-
-const aiTurn = (playerObject) =>
+const minimax = (depth, isMaximizing, playerObject) =>
 {
     let openSpaces = gameBoardArray.filter(square =>
     {
         return square.innerHTML == ""
     })
-    // console.log(openSpaces)
-    // console.log("OpenSpaces.Length" + openSpaces.length)
 
-    let randomIndex = Math.floor(Math.random() * openSpaces.length)
-    turns++
-    if(gameInProgress)
+    let result = checkBoard(playerObject.token)
+    let resultOpponent = checkBoard(playerObject.opponent.token)
+    if (result)
     {
-        processTurn(openSpaces[randomIndex], playerObject)
-        console.log("AI Selected: "+openSpaces[randomIndex].id)
+        if (isMaximizing)
+        {
+            return 1
+        }
+        else
+        {
+            return -1
+        }
     }
-    if(gameInProgress)
+    else if (resultOpponent)
     {
+        if (isMaximizing)
+        {
+            return -1
+        }
+        else
+        {
+            return 1
+        }
+    }
+    else if (openSpaces.length <= 0)
+    {
+        console.log(depth)
+        return 0
+    }
+    else if( depth > 4)
+    {
+        return 0
+    }
+
+    if (isMaximizing)
+    {
+
+        let bestScore = -Infinity
+        openSpaces.forEach(space =>
+        {
+            space.innerHTML = playerObject.token
+            let score = minimax(depth + 1, false, playerObject.opponent)
+            space.innerHTML = ""
+            if (score > bestScore)
+            {
+                bestScore = score
+            }
+            // if(space.id == 2)
+            // {
+            //     console.log("this score:"+score)
+            // }
+        })
+        return bestScore
+    }
+    else
+    {
+        // console.log(playerObject.chosenName)
+        let bestScore = Infinity
+        openSpaces.forEach(space =>
+        {
+            space.innerHTML = playerObject.token
+            let score = minimax(depth + 1, true, playerObject.opponent)
+            space.innerHTML = ""
+            if (score < bestScore)
+            {
+                bestScore = score
+            }
+            // if(space.id == 2)
+            // {
+            //     console.log("op score:"+score)
+            // }
+        })
+        return bestScore
+    }
+}
+
+const aiTurn = (playerObject) =>
+{
+
+    let openSpaces = gameBoardArray.filter(square =>
+    {
+        return square.innerHTML == ""
+    })
+
+    if (playerObject.aiLevel == 0)  // ai-easy
+    {
+        let randomIndex = Math.floor(Math.random() * openSpaces.length)
+        processTurn(openSpaces[randomIndex], playerObject)
+        console.log("AI Selected: " + openSpaces[randomIndex].id)
         prepareBoardFor(playerObject.opponent)
     }
+    else if (playerObject.aiLevel == 1) // ai-hard - uses minimax
+    {
+        // from the coding train : https://www.youtube.com/watch?v=trKjYdBASyQ
+        let bestScore = -Infinity
+        let bestMove
+
+        openSpaces.forEach(space =>
+        {
+            space.innerHTML = playerObject.token
+            let score = minimax(0, false, playerObject.opponent)
+            space.innerHTML = ""
+            if (score > bestScore)
+            {
+                bestScore = score
+                bestMove = space
+            }
+            console.log("AI rated position " + space.id + " as score " + score)
+        })
+
+        console.log("AI Selected: " + bestMove.id)
+
+        processTurn(bestMove, playerObject)
+        prepareBoardFor(playerObject.opponent)
+    }
+
+    if (playerObject.opponent.ai == true && gameInProgress == true)
+    {
+        aiTurn(playerObject.opponent)
+    }
+
 }
 
 const processTurn = (squareClicked, playerObject) =>
@@ -467,16 +591,21 @@ const processTurn = (squareClicked, playerObject) =>
     squareClicked.innerHTML = playerObject.token
     squareClicked.classList.add(playerObject.colorClassName)
     isPLayer1Turn = !isPLayer1Turn
+    turns++
     checkForWin()
 }
 
 const prepareBoardFor = forPlayerObject =>
 {
-    // console.log("prepare board for " + forPlayerObject.chosenName + "with color:" + forPlayerObject.mainColor)
-    let status = document.querySelector('.status')
-    status.innerHTML = `${forPlayerObject.chosenName}'s turn`
-    status.style.backgroundColor = forPlayerObject.mainColor
-    setHoverColor(forPlayerObject.colorClassName + '-hover')
+    if (gameInProgress)
+    {
+        // console.log("prepare board for " + forPlayerObject.chosenName + "with color:" + forPlayerObject.mainColor)
+        let status = document.querySelector('.status')
+        status.innerHTML = `${forPlayerObject.chosenName}'s turn`
+        status.style.backgroundColor = forPlayerObject.mainColor
+        setHoverColor(forPlayerObject.colorClassName + '-hover')
+    }
+
 }
 
 function squareClicked() // avoid arrow function to make use of the this property
@@ -490,11 +619,11 @@ function squareClicked() // avoid arrow function to make use of the this propert
             processTurn(this, player1)
             isPLayer1Turn = false
             prepareBoardFor(player2)
-            turns++
-            checkForWin()
+            //turns++
+            //checkForWin()
             if (player2.ai && gameInProgress)
             {
-                setTimeout(aiTurn, 1000,(player2))
+                aiTurn(player2)
             }
         }
         else
@@ -502,11 +631,11 @@ function squareClicked() // avoid arrow function to make use of the this propert
             processTurn(this, player2)
             isPLayer1Turn = true
             prepareBoardFor(player1)
-            turns++
-            checkForWin()
+            //turns++
+            //checkForWin()
             if (player1.ai && gameInProgress)
             {
-                setTimeout(aiTurn, 1000,(player1))
+                aiTurn(player1)
             }
 
         }
@@ -531,6 +660,11 @@ const resetBoard = () =>
     document.querySelector('.play-again-button').style.display = "none"
     resetConfetti()
     turns = 0
+    startIndex = getRandomNumber(0, playerTokens.length - 1)
+    if (player1.ai == true)
+    {
+        aiTurn(player1)
+    }
 }
 
 const prepareConfetti = () =>
@@ -543,7 +677,6 @@ const prepareConfetti = () =>
         newConfetti.classList.add('confetti')
         allConfetti.push(newConfetti)
         confetti.append(newConfetti)
-
     }
     document.body.append(confetti)
 }
@@ -605,15 +738,6 @@ const resetConfetti = () =>
     })
 }
 
-// const keyDown = event =>
-// {
-//     if (event.key == 'x')
-//     {
-//         explodeConfetti()
-//         setTimeout(resetConfetti, 5000)
-//     }
-// }
-
 const buildBoard = () =>
 {
     let mainParentDiv = document.createElement('div')
@@ -641,6 +765,23 @@ const buildBoard = () =>
     scorep2Div.classList.add('score', 'score-p2')
     scoreDiv.append(scorep2Div)
 
+    let boardDiv = document.createElement('div')
+    boardDiv.classList.add('board')
+    mainDiv.append(boardDiv)
+
+    for (let i = 0; i < 9; i++)
+    {
+        let squareDiv = document.createElement('div')
+        squareDiv.classList.add('square')
+        squareDiv.id = i
+        gameBoardArray.push(squareDiv)
+        squareDiv.newClass = "player-1-colors-hover"
+        squareDiv.addEventListener('mouseover', addClass)
+        squareDiv.addEventListener('mouseout', removeClass)
+        squareDiv.addEventListener('click', squareClicked)
+        boardDiv.append(squareDiv)
+    }
+
     let resetButtonDiv = document.createElement('div')
     resetButtonDiv.classList.add('resetDiv')
 
@@ -660,23 +801,6 @@ const buildBoard = () =>
     resetButtonDiv.append(playAgainButton)
     mainDiv.append(resetButtonDiv)
 
-    let boardDiv = document.createElement('div')
-    boardDiv.classList.add('board')
-    mainDiv.append(boardDiv)
-
-    for (let i = 0; i < 9; i++)
-    {
-        let squareDiv = document.createElement('div')
-        squareDiv.classList.add('square')
-        squareDiv.id = i
-        gameBoardArray.push(squareDiv)
-        squareDiv.newClass = "player-1-colors-hover"
-        squareDiv.addEventListener('mouseover', addClass)
-        squareDiv.addEventListener('mouseout', removeClass)
-        squareDiv.addEventListener('click', squareClicked)
-        boardDiv.append(squareDiv)
-    }
-
     prepareConfetti()
     resetConfetti()
     // document.addEventListener('keyup', keyDown)
@@ -684,8 +808,6 @@ const buildBoard = () =>
 }
 
 buildBoard()
-
-
 
 //////////
 // Bugs
