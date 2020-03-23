@@ -1,0 +1,11 @@
+.confetti{
+    display: none;
+    height: 10px;
+    width: 5px;
+    background-color: black;
+    position: absolute;
+    left: 50vw;
+    top: 50vh;
+    transition: 0.3s;
+    transition-timing-function: ease-out;
+}
